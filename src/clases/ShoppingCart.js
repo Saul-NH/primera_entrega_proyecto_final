@@ -1,6 +1,6 @@
 const fs = require('fs');
 const Product =  require('./Product')
-const product = new Product('./src/data/productos.txt');
+const product = new Product('./src/data/products.txt');
 
 class ShoppingCart {
     constructor(filename) {
@@ -24,11 +24,24 @@ class ShoppingCart {
         }
     }
 
+    async getProducts(shoppingCartId){
+        try {
+            const shoppingCart = await this.getShoppingCartById(shoppingCartId);
+            if (!shoppingCart || !shoppingCart.products || shoppingCart.products.length === 0) {
+                return null;
+            }
+
+            return shoppingCart.products
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     async getShoppingCartById(id) {
         try {
             let content = await this.readFile();
-            shoppingCart = content.filter((shoppingCart) => shoppingCart.id === id);
-            return content.length == 0 ? null : shoppingCart;
+            const shoppingCart = content.filter((shoppingCart) => shoppingCart.id == id);
+            return shoppingCart.length == 0 ? null : shoppingCart[0];
         } catch (error) {
             console.error(error);
         }
@@ -47,10 +60,13 @@ class ShoppingCart {
             if(!productFound){
                 return 'Product not found'
             }
-
-            shoppingCart.products.push(productFound);
-
-            this.addProduct(shoppingCartId, shoppingCart)
+            if (!shoppingCart.products) {
+                shoppingCart.products = [productFound];
+            }else{
+                shoppingCart.products.push(productFound);
+            }
+            
+            await this.addProduct(shoppingCartId, shoppingCart)
 
             return `Product with id ${productId} added to cart`
 
@@ -92,9 +108,17 @@ class ShoppingCart {
         }
     }
     
-    async deleteAll() {
+    async deleteById(id) {
         try {
-            this.writeFile([]);
+            let shoppingCarts = await this.readFile();
+            const shoppingCart = shoppingCarts.filter((shoppingCart) => shoppingCart.id == id)
+
+            if (shoppingCart.length > 0) {
+                this.writeFile(shoppingCarts.filter((shoppingCart) => shoppingCart.id !== id));
+                return 'Shopping Cart deleted'
+            }else{
+                return 'Shopping Cart not found'
+            }
         } catch (error) {
             console.error(error);
         }

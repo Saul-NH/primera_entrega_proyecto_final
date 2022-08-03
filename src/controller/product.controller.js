@@ -1,5 +1,5 @@
 const Product =  require('../clases/Product');
-const product = new Product('./src/data/productos.txt');
+const product = new Product('./src/data/products.txt');
 
 const getAllProducts = async(req, res) => {
     try {

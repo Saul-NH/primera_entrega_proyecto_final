@@ -24,8 +24,8 @@ class Product {
     async getById(id) {
         try {
             let content = await this.readFile();
-            product = content.filter((product) => product.id === id);
-            return content.length == 0 ? null : product;
+            let product = content.filter((product) => product.id === id);
+            return content.length == 0 ? null : product[0];
         } catch (error) {
             console.error(error);
         }
@@ -41,11 +41,11 @@ class Product {
     
     async deleteById(id) {
         try {
-            let content = await this.readFile();
-            let product = content.filter((product) => product.id == id)
+            let products = await this.readFile();
+            let product = products.filter((product) => product.id == id)
             
             if (product.length > 0) {
-                this.writeFile(content.filter((product) => product.id !== id));
+                this.writeFile(products.filter((product) => product.id !== id));
                 return 'Product deleted'
             }else{
                 return 'Product not found'
